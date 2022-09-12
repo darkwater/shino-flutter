@@ -15,20 +15,21 @@ extension GetRemoteHostCollection on Isar {
 const RemoteHostSchema = CollectionSchema(
   name: 'RemoteHost',
   schema:
-      '{"name":"RemoteHost","idName":"id","properties":[{"name":"address","type":"String"},{"name":"name","type":"String"},{"name":"password","type":"String"},{"name":"port","type":"Long"},{"name":"publicKey","type":"String"},{"name":"username","type":"String"}],"indexes":[],"links":[]}',
+      '{"name":"RemoteHost","idName":"id","properties":[{"name":"address","type":"String"},{"name":"command","type":"String"},{"name":"hostKey","type":"String"},{"name":"name","type":"String"},{"name":"password","type":"String"},{"name":"port","type":"Long"},{"name":"username","type":"String"}],"indexes":[],"links":[{"name":"keypair","target":"Keypair"}]}',
   idName: 'id',
   propertyIds: {
     'address': 0,
-    'name': 1,
-    'password': 2,
-    'port': 3,
-    'publicKey': 4,
-    'username': 5
+    'command': 1,
+    'hostKey': 2,
+    'name': 3,
+    'password': 4,
+    'port': 5,
+    'username': 6
   },
   listProperties: {},
   indexIds: {},
   indexValueTypes: {},
-  linkIds: {},
+  linkIds: {'keypair': 0},
   backlinkLinkNames: {},
   getId: _remoteHostGetId,
   setId: _remoteHostSetId,
@@ -56,7 +57,7 @@ void _remoteHostSetId(RemoteHost object, int id) {
 }
 
 List<IsarLinkBase> _remoteHostGetLinks(RemoteHost object) {
-  return [];
+  return [object.keypair];
 }
 
 void _remoteHostSerializeNative(
@@ -70,25 +71,25 @@ void _remoteHostSerializeNative(
   final value0 = object.address;
   final _address = IsarBinaryWriter.utf8Encoder.convert(value0);
   dynamicSize += (_address.length) as int;
-  final value1 = object.name;
-  final _name = IsarBinaryWriter.utf8Encoder.convert(value1);
-  dynamicSize += (_name.length) as int;
-  final value2 = object.password;
-  IsarUint8List? _password;
+  final value1 = object.command;
+  final _command = IsarBinaryWriter.utf8Encoder.convert(value1);
+  dynamicSize += (_command.length) as int;
+  final value2 = object.hostKey;
+  IsarUint8List? _hostKey;
   if (value2 != null) {
-    _password = IsarBinaryWriter.utf8Encoder.convert(value2);
+    _hostKey = IsarBinaryWriter.utf8Encoder.convert(value2);
   }
-  dynamicSize += (_password?.length ?? 0) as int;
-  final value3 = object.port;
-  final _port = value3;
-  final value4 = object.publicKey;
-  IsarUint8List? _publicKey;
-  if (value4 != null) {
-    _publicKey = IsarBinaryWriter.utf8Encoder.convert(value4);
-  }
-  dynamicSize += (_publicKey?.length ?? 0) as int;
-  final value5 = object.username;
-  final _username = IsarBinaryWriter.utf8Encoder.convert(value5);
+  dynamicSize += (_hostKey?.length ?? 0) as int;
+  final value3 = object.name;
+  final _name = IsarBinaryWriter.utf8Encoder.convert(value3);
+  dynamicSize += (_name.length) as int;
+  final value4 = object.password;
+  final _password = IsarBinaryWriter.utf8Encoder.convert(value4);
+  dynamicSize += (_password.length) as int;
+  final value5 = object.port;
+  final _port = value5;
+  final value6 = object.username;
+  final _username = IsarBinaryWriter.utf8Encoder.convert(value6);
   dynamicSize += (_username.length) as int;
   final size = staticSize + dynamicSize;
 
@@ -97,24 +98,27 @@ void _remoteHostSerializeNative(
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _address);
-  writer.writeBytes(offsets[1], _name);
-  writer.writeBytes(offsets[2], _password);
-  writer.writeLong(offsets[3], _port);
-  writer.writeBytes(offsets[4], _publicKey);
-  writer.writeBytes(offsets[5], _username);
+  writer.writeBytes(offsets[1], _command);
+  writer.writeBytes(offsets[2], _hostKey);
+  writer.writeBytes(offsets[3], _name);
+  writer.writeBytes(offsets[4], _password);
+  writer.writeLong(offsets[5], _port);
+  writer.writeBytes(offsets[6], _username);
 }
 
 RemoteHost _remoteHostDeserializeNative(IsarCollection<RemoteHost> collection,
     int id, IsarBinaryReader reader, List<int> offsets) {
   final object = RemoteHost(
     address: reader.readString(offsets[0]),
-    name: reader.readString(offsets[1]),
-    password: reader.readStringOrNull(offsets[2]),
-    port: reader.readLong(offsets[3]),
-    publicKey: reader.readStringOrNull(offsets[4]),
-    username: reader.readString(offsets[5]),
+    command: reader.readString(offsets[1]),
+    hostKey: reader.readStringOrNull(offsets[2]),
+    name: reader.readString(offsets[3]),
+    password: reader.readString(offsets[4]),
+    port: reader.readLong(offsets[5]),
+    username: reader.readString(offsets[6]),
   );
   object.id = id;
+  _remoteHostAttachLinks(collection, id, object);
   return object;
 }
 
@@ -130,10 +134,12 @@ P _remoteHostDeserializePropNative<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readString(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -144,11 +150,12 @@ dynamic _remoteHostSerializeWeb(
     IsarCollection<RemoteHost> collection, RemoteHost object) {
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'address', object.address);
+  IsarNative.jsObjectSet(jsObj, 'command', object.command);
+  IsarNative.jsObjectSet(jsObj, 'hostKey', object.hostKey);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'name', object.name);
   IsarNative.jsObjectSet(jsObj, 'password', object.password);
   IsarNative.jsObjectSet(jsObj, 'port', object.port);
-  IsarNative.jsObjectSet(jsObj, 'publicKey', object.publicKey);
   IsarNative.jsObjectSet(jsObj, 'username', object.username);
   return jsObj;
 }
@@ -157,13 +164,16 @@ RemoteHost _remoteHostDeserializeWeb(
     IsarCollection<RemoteHost> collection, dynamic jsObj) {
   final object = RemoteHost(
     address: IsarNative.jsObjectGet(jsObj, 'address') ?? '',
+    command: IsarNative.jsObjectGet(jsObj, 'command') ?? '',
+    hostKey: IsarNative.jsObjectGet(jsObj, 'hostKey'),
     name: IsarNative.jsObjectGet(jsObj, 'name') ?? '',
-    password: IsarNative.jsObjectGet(jsObj, 'password'),
+    password: IsarNative.jsObjectGet(jsObj, 'password') ?? '',
     port: IsarNative.jsObjectGet(jsObj, 'port') ?? double.negativeInfinity,
-    publicKey: IsarNative.jsObjectGet(jsObj, 'publicKey'),
     username: IsarNative.jsObjectGet(jsObj, 'username') ?? '',
   );
   object.id = IsarNative.jsObjectGet(jsObj, 'id');
+  _remoteHostAttachLinks(
+      collection, IsarNative.jsObjectGet(jsObj, 'id'), object);
   return object;
 }
 
@@ -171,17 +181,19 @@ P _remoteHostDeserializePropWeb<P>(Object jsObj, String propertyName) {
   switch (propertyName) {
     case 'address':
       return (IsarNative.jsObjectGet(jsObj, 'address') ?? '') as P;
+    case 'command':
+      return (IsarNative.jsObjectGet(jsObj, 'command') ?? '') as P;
+    case 'hostKey':
+      return (IsarNative.jsObjectGet(jsObj, 'hostKey')) as P;
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
     case 'name':
       return (IsarNative.jsObjectGet(jsObj, 'name') ?? '') as P;
     case 'password':
-      return (IsarNative.jsObjectGet(jsObj, 'password')) as P;
+      return (IsarNative.jsObjectGet(jsObj, 'password') ?? '') as P;
     case 'port':
       return (IsarNative.jsObjectGet(jsObj, 'port') ?? double.negativeInfinity)
           as P;
-    case 'publicKey':
-      return (IsarNative.jsObjectGet(jsObj, 'publicKey')) as P;
     case 'username':
       return (IsarNative.jsObjectGet(jsObj, 'username') ?? '') as P;
     default:
@@ -189,7 +201,9 @@ P _remoteHostDeserializePropWeb<P>(Object jsObj, String propertyName) {
   }
 }
 
-void _remoteHostAttachLinks(IsarCollection col, int id, RemoteHost object) {}
+void _remoteHostAttachLinks(IsarCollection col, int id, RemoteHost object) {
+  object.keypair.attach(col, col.isar.keypairs, 'keypair', id);
+}
 
 extension RemoteHostQueryWhereSort
     on QueryBuilder<RemoteHost, RemoteHost, QWhere> {
@@ -360,6 +374,222 @@ extension RemoteHostQueryFilter
     ));
   }
 
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'command',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition>
+      commandGreaterThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'command',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandLessThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'command',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'command',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'command',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'command',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'command',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> commandMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'command',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyIsNull() {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.isNull,
+      property: 'hostKey',
+      value: null,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'hostKey',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition>
+      hostKeyGreaterThan(
+    String? value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'hostKey',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyLessThan(
+    String? value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'hostKey',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyBetween(
+    String? lower,
+    String? upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'hostKey',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'hostKey',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'hostKey',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'hostKey',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> hostKeyMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'hostKey',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
   QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> idIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
@@ -519,16 +749,8 @@ extension RemoteHostQueryFilter
     ));
   }
 
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> passwordIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.isNull,
-      property: 'password',
-      value: null,
-    ));
-  }
-
   QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> passwordEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -541,7 +763,7 @@ extension RemoteHostQueryFilter
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition>
       passwordGreaterThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -555,7 +777,7 @@ extension RemoteHostQueryFilter
   }
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> passwordLessThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -569,8 +791,8 @@ extension RemoteHostQueryFilter
   }
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> passwordBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool caseSensitive = true,
     bool includeLower = true,
     bool includeUpper = true,
@@ -677,120 +899,6 @@ extension RemoteHostQueryFilter
       includeLower: includeLower,
       upper: upper,
       includeUpper: includeUpper,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition>
-      publicKeyIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.isNull,
-      property: 'publicKey',
-      value: null,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> publicKeyEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.eq,
-      property: 'publicKey',
-      value: value,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition>
-      publicKeyGreaterThan(
-    String? value, {
-    bool caseSensitive = true,
-    bool include = false,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.gt,
-      include: include,
-      property: 'publicKey',
-      value: value,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> publicKeyLessThan(
-    String? value, {
-    bool caseSensitive = true,
-    bool include = false,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.lt,
-      include: include,
-      property: 'publicKey',
-      value: value,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> publicKeyBetween(
-    String? lower,
-    String? upper, {
-    bool caseSensitive = true,
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition.between(
-      property: 'publicKey',
-      lower: lower,
-      includeLower: includeLower,
-      upper: upper,
-      includeUpper: includeUpper,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition>
-      publicKeyStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.startsWith,
-      property: 'publicKey',
-      value: value,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> publicKeyEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.endsWith,
-      property: 'publicKey',
-      value: value,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> publicKeyContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.contains,
-      property: 'publicKey',
-      value: value,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> publicKeyMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.matches,
-      property: 'publicKey',
-      value: pattern,
-      caseSensitive: caseSensitive,
     ));
   }
 
@@ -901,7 +1009,16 @@ extension RemoteHostQueryFilter
 }
 
 extension RemoteHostQueryLinks
-    on QueryBuilder<RemoteHost, RemoteHost, QFilterCondition> {}
+    on QueryBuilder<RemoteHost, RemoteHost, QFilterCondition> {
+  QueryBuilder<RemoteHost, RemoteHost, QAfterFilterCondition> keypair(
+      FilterQuery<Keypair> q) {
+    return linkInternal(
+      isar.keypairs,
+      q,
+      'keypair',
+    );
+  }
+}
 
 extension RemoteHostQueryWhereSortBy
     on QueryBuilder<RemoteHost, RemoteHost, QSortBy> {
@@ -911,6 +1028,22 @@ extension RemoteHostQueryWhereSortBy
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByAddressDesc() {
     return addSortByInternal('address', Sort.desc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByCommand() {
+    return addSortByInternal('command', Sort.asc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByCommandDesc() {
+    return addSortByInternal('command', Sort.desc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByHostKey() {
+    return addSortByInternal('hostKey', Sort.asc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByHostKeyDesc() {
+    return addSortByInternal('hostKey', Sort.desc);
   }
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortById() {
@@ -945,14 +1078,6 @@ extension RemoteHostQueryWhereSortBy
     return addSortByInternal('port', Sort.desc);
   }
 
-  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByPublicKey() {
-    return addSortByInternal('publicKey', Sort.asc);
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByPublicKeyDesc() {
-    return addSortByInternal('publicKey', Sort.desc);
-  }
-
   QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> sortByUsername() {
     return addSortByInternal('username', Sort.asc);
   }
@@ -970,6 +1095,22 @@ extension RemoteHostQueryWhereSortThenBy
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByAddressDesc() {
     return addSortByInternal('address', Sort.desc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByCommand() {
+    return addSortByInternal('command', Sort.asc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByCommandDesc() {
+    return addSortByInternal('command', Sort.desc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByHostKey() {
+    return addSortByInternal('hostKey', Sort.asc);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByHostKeyDesc() {
+    return addSortByInternal('hostKey', Sort.desc);
   }
 
   QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenById() {
@@ -1004,14 +1145,6 @@ extension RemoteHostQueryWhereSortThenBy
     return addSortByInternal('port', Sort.desc);
   }
 
-  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByPublicKey() {
-    return addSortByInternal('publicKey', Sort.asc);
-  }
-
-  QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByPublicKeyDesc() {
-    return addSortByInternal('publicKey', Sort.desc);
-  }
-
   QueryBuilder<RemoteHost, RemoteHost, QAfterSortBy> thenByUsername() {
     return addSortByInternal('username', Sort.asc);
   }
@@ -1026,6 +1159,16 @@ extension RemoteHostQueryWhereDistinct
   QueryBuilder<RemoteHost, RemoteHost, QDistinct> distinctByAddress(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('address', caseSensitive: caseSensitive);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QDistinct> distinctByCommand(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('command', caseSensitive: caseSensitive);
+  }
+
+  QueryBuilder<RemoteHost, RemoteHost, QDistinct> distinctByHostKey(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('hostKey', caseSensitive: caseSensitive);
   }
 
   QueryBuilder<RemoteHost, RemoteHost, QDistinct> distinctById() {
@@ -1046,11 +1189,6 @@ extension RemoteHostQueryWhereDistinct
     return addDistinctByInternal('port');
   }
 
-  QueryBuilder<RemoteHost, RemoteHost, QDistinct> distinctByPublicKey(
-      {bool caseSensitive = true}) {
-    return addDistinctByInternal('publicKey', caseSensitive: caseSensitive);
-  }
-
   QueryBuilder<RemoteHost, RemoteHost, QDistinct> distinctByUsername(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('username', caseSensitive: caseSensitive);
@@ -1063,6 +1201,14 @@ extension RemoteHostQueryProperty
     return addPropertyNameInternal('address');
   }
 
+  QueryBuilder<RemoteHost, String, QQueryOperations> commandProperty() {
+    return addPropertyNameInternal('command');
+  }
+
+  QueryBuilder<RemoteHost, String?, QQueryOperations> hostKeyProperty() {
+    return addPropertyNameInternal('hostKey');
+  }
+
   QueryBuilder<RemoteHost, int?, QQueryOperations> idProperty() {
     return addPropertyNameInternal('id');
   }
@@ -1071,16 +1217,12 @@ extension RemoteHostQueryProperty
     return addPropertyNameInternal('name');
   }
 
-  QueryBuilder<RemoteHost, String?, QQueryOperations> passwordProperty() {
+  QueryBuilder<RemoteHost, String, QQueryOperations> passwordProperty() {
     return addPropertyNameInternal('password');
   }
 
   QueryBuilder<RemoteHost, int, QQueryOperations> portProperty() {
     return addPropertyNameInternal('port');
-  }
-
-  QueryBuilder<RemoteHost, String?, QQueryOperations> publicKeyProperty() {
-    return addPropertyNameInternal('publicKey');
   }
 
   QueryBuilder<RemoteHost, String, QQueryOperations> usernameProperty() {

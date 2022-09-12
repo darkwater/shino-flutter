@@ -7,19 +7,22 @@ class NavigationDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.dashboard),
-          title: const Text("Dashboard"),
-          onTap: () => Navigator.push(context, DashboardPage.route()),
-        ),
-        ListTile(
-          leading: const Icon(Icons.settings),
-          title: const Text("Settings"),
-          onTap: () => Navigator.push(context, SettingsPage.route()),
-        ),
-      ],
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(child: Container()),
+          ListTile(
+            leading: const Icon(Icons.dashboard),
+            title: const Text("Dashboard"),
+            onTap: () => Navigator.push(context, DashboardPage.route()),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text("Settings"),
+            onTap: () => Navigator.push(context, SettingsPage.route()),
+          ),
+        ],
+      ),
     );
   }
 }

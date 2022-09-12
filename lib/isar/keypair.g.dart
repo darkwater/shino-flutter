@@ -15,14 +15,20 @@ extension GetKeypairCollection on Isar {
 const KeypairSchema = CollectionSchema(
   name: 'Keypair',
   schema:
-      '{"name":"Keypair","idName":"id","properties":[{"name":"privateKeyId","type":"String"},{"name":"publicKey","type":"String"}],"indexes":[],"links":[]}',
+      '{"name":"Keypair","idName":"id","properties":[{"name":"name","type":"String"},{"name":"privateKeyId","type":"String"},{"name":"publicKey","type":"ByteList"},{"name":"publicKeyBase64","type":"String"},{"name":"publicKeyOpenSSH","type":"String"}],"indexes":[],"links":[]}',
   idName: 'id',
-  propertyIds: {'privateKeyId': 0, 'publicKey': 1},
-  listProperties: {},
+  propertyIds: {
+    'name': 0,
+    'privateKeyId': 1,
+    'publicKey': 2,
+    'publicKeyBase64': 3,
+    'publicKeyOpenSSH': 4
+  },
+  listProperties: {'publicKey'},
   indexIds: {},
   indexValueTypes: {},
-  linkIds: {},
-  backlinkLinkNames: {},
+  linkIds: {'hosts': 0},
+  backlinkLinkNames: {'hosts': 'keypair'},
   getId: _keypairGetId,
   setId: _keypairSetId,
   getLinks: _keypairGetLinks,
@@ -49,7 +55,7 @@ void _keypairSetId(Keypair object, int id) {
 }
 
 List<IsarLinkBase> _keypairGetLinks(Keypair object) {
-  return [];
+  return [object.hosts];
 }
 
 void _keypairSerializeNative(
@@ -60,29 +66,43 @@ void _keypairSerializeNative(
     List<int> offsets,
     AdapterAlloc alloc) {
   var dynamicSize = 0;
-  final value0 = object.privateKeyId;
-  final _privateKeyId = IsarBinaryWriter.utf8Encoder.convert(value0);
+  final value0 = object.name;
+  final _name = IsarBinaryWriter.utf8Encoder.convert(value0);
+  dynamicSize += (_name.length) as int;
+  final value1 = object.privateKeyId;
+  final _privateKeyId = IsarBinaryWriter.utf8Encoder.convert(value1);
   dynamicSize += (_privateKeyId.length) as int;
-  final value1 = object.publicKey;
-  final _publicKey = IsarBinaryWriter.utf8Encoder.convert(value1);
-  dynamicSize += (_publicKey.length) as int;
+  final value2 = object.publicKey;
+  dynamicSize += (value2.length) * 1;
+  final _publicKey = value2;
+  final value3 = object.publicKeyBase64;
+  final _publicKeyBase64 = IsarBinaryWriter.utf8Encoder.convert(value3);
+  dynamicSize += (_publicKeyBase64.length) as int;
+  final value4 = object.publicKeyOpenSSH;
+  final _publicKeyOpenSSH = IsarBinaryWriter.utf8Encoder.convert(value4);
+  dynamicSize += (_publicKeyOpenSSH.length) as int;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
   rawObj.buffer_length = size;
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
-  writer.writeBytes(offsets[0], _privateKeyId);
-  writer.writeBytes(offsets[1], _publicKey);
+  writer.writeBytes(offsets[0], _name);
+  writer.writeBytes(offsets[1], _privateKeyId);
+  writer.writeBytes(offsets[2], _publicKey);
+  writer.writeBytes(offsets[3], _publicKeyBase64);
+  writer.writeBytes(offsets[4], _publicKeyOpenSSH);
 }
 
 Keypair _keypairDeserializeNative(IsarCollection<Keypair> collection, int id,
     IsarBinaryReader reader, List<int> offsets) {
   final object = Keypair(
-    privateKeyId: reader.readString(offsets[0]),
-    publicKey: reader.readString(offsets[1]),
+    name: reader.readString(offsets[0]),
+    privateKeyId: reader.readString(offsets[1]),
+    publicKey: reader.readBytes(offsets[2]),
   );
   object.id = id;
+  _keypairAttachLinks(collection, id, object);
   return object;
 }
 
@@ -95,6 +115,12 @@ P _keypairDeserializePropNative<P>(
       return (reader.readString(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readBytes(offset)) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
   }
@@ -104,18 +130,23 @@ dynamic _keypairSerializeWeb(
     IsarCollection<Keypair> collection, Keypair object) {
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
+  IsarNative.jsObjectSet(jsObj, 'name', object.name);
   IsarNative.jsObjectSet(jsObj, 'privateKeyId', object.privateKeyId);
   IsarNative.jsObjectSet(jsObj, 'publicKey', object.publicKey);
+  IsarNative.jsObjectSet(jsObj, 'publicKeyBase64', object.publicKeyBase64);
+  IsarNative.jsObjectSet(jsObj, 'publicKeyOpenSSH', object.publicKeyOpenSSH);
   return jsObj;
 }
 
 Keypair _keypairDeserializeWeb(
     IsarCollection<Keypair> collection, dynamic jsObj) {
   final object = Keypair(
+    name: IsarNative.jsObjectGet(jsObj, 'name') ?? '',
     privateKeyId: IsarNative.jsObjectGet(jsObj, 'privateKeyId') ?? '',
-    publicKey: IsarNative.jsObjectGet(jsObj, 'publicKey') ?? '',
+    publicKey: IsarNative.jsObjectGet(jsObj, 'publicKey') ?? Uint8List(0),
   );
   object.id = IsarNative.jsObjectGet(jsObj, 'id');
+  _keypairAttachLinks(collection, IsarNative.jsObjectGet(jsObj, 'id'), object);
   return object;
 }
 
@@ -123,16 +154,24 @@ P _keypairDeserializePropWeb<P>(Object jsObj, String propertyName) {
   switch (propertyName) {
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
+    case 'name':
+      return (IsarNative.jsObjectGet(jsObj, 'name') ?? '') as P;
     case 'privateKeyId':
       return (IsarNative.jsObjectGet(jsObj, 'privateKeyId') ?? '') as P;
     case 'publicKey':
-      return (IsarNative.jsObjectGet(jsObj, 'publicKey') ?? '') as P;
+      return (IsarNative.jsObjectGet(jsObj, 'publicKey') ?? Uint8List(0)) as P;
+    case 'publicKeyBase64':
+      return (IsarNative.jsObjectGet(jsObj, 'publicKeyBase64') ?? '') as P;
+    case 'publicKeyOpenSSH':
+      return (IsarNative.jsObjectGet(jsObj, 'publicKeyOpenSSH') ?? '') as P;
     default:
       throw 'Illegal propertyName';
   }
 }
 
-void _keypairAttachLinks(IsarCollection col, int id, Keypair object) {}
+void _keypairAttachLinks(IsarCollection col, int id, Keypair object) {
+  object.hosts.attach(col, col.isar.remoteHosts, 'hosts', id);
+}
 
 extension KeypairQueryWhereSort on QueryBuilder<Keypair, Keypair, QWhere> {
   QueryBuilder<Keypair, Keypair, QAfterWhere> anyId() {
@@ -252,6 +291,109 @@ extension KeypairQueryFilter
     ));
   }
 
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'name',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameGreaterThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'name',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameLessThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'name',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'name',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'name',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'name',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'name',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> nameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'name',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
   QueryBuilder<Keypair, Keypair, QAfterFilterCondition> privateKeyIdEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -355,19 +497,20 @@ extension KeypairQueryFilter
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyEqualTo(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBase64EqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyGreaterThan(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyBase64GreaterThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -375,13 +518,13 @@ extension KeypairQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyLessThan(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBase64LessThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -389,13 +532,13 @@ extension KeypairQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBetween(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBase64Between(
     String lower,
     String upper, {
     bool caseSensitive = true,
@@ -403,7 +546,7 @@ extension KeypairQueryFilter
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -412,47 +555,154 @@ extension KeypairQueryFilter
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyStartsWith(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyBase64StartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyEndsWith(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBase64EndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyContains(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBase64Contains(
       String value,
       {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyMatches(
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyBase64Matches(
       String pattern,
       {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'publicKey',
+      property: 'publicKeyBase64',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyOpenSSHEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'publicKeyOpenSSH',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyOpenSSHGreaterThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'publicKeyOpenSSH',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyOpenSSHLessThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'publicKeyOpenSSH',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyOpenSSHBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'publicKeyOpenSSH',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyOpenSSHStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'publicKeyOpenSSH',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyOpenSSHEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'publicKeyOpenSSH',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition>
+      publicKeyOpenSSHContains(String value, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'publicKeyOpenSSH',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> publicKeyOpenSSHMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'publicKeyOpenSSH',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
@@ -460,7 +710,16 @@ extension KeypairQueryFilter
 }
 
 extension KeypairQueryLinks
-    on QueryBuilder<Keypair, Keypair, QFilterCondition> {}
+    on QueryBuilder<Keypair, Keypair, QFilterCondition> {
+  QueryBuilder<Keypair, Keypair, QAfterFilterCondition> hosts(
+      FilterQuery<RemoteHost> q) {
+    return linkInternal(
+      isar.remoteHosts,
+      q,
+      'hosts',
+    );
+  }
+}
 
 extension KeypairQueryWhereSortBy on QueryBuilder<Keypair, Keypair, QSortBy> {
   QueryBuilder<Keypair, Keypair, QAfterSortBy> sortById() {
@@ -471,6 +730,14 @@ extension KeypairQueryWhereSortBy on QueryBuilder<Keypair, Keypair, QSortBy> {
     return addSortByInternal('id', Sort.desc);
   }
 
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByName() {
+    return addSortByInternal('name', Sort.asc);
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByNameDesc() {
+    return addSortByInternal('name', Sort.desc);
+  }
+
   QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPrivateKeyId() {
     return addSortByInternal('privateKeyId', Sort.asc);
   }
@@ -479,12 +746,20 @@ extension KeypairQueryWhereSortBy on QueryBuilder<Keypair, Keypair, QSortBy> {
     return addSortByInternal('privateKeyId', Sort.desc);
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPublicKey() {
-    return addSortByInternal('publicKey', Sort.asc);
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPublicKeyBase64() {
+    return addSortByInternal('publicKeyBase64', Sort.asc);
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPublicKeyDesc() {
-    return addSortByInternal('publicKey', Sort.desc);
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPublicKeyBase64Desc() {
+    return addSortByInternal('publicKeyBase64', Sort.desc);
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPublicKeyOpenSSH() {
+    return addSortByInternal('publicKeyOpenSSH', Sort.asc);
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> sortByPublicKeyOpenSSHDesc() {
+    return addSortByInternal('publicKeyOpenSSH', Sort.desc);
   }
 }
 
@@ -498,6 +773,14 @@ extension KeypairQueryWhereSortThenBy
     return addSortByInternal('id', Sort.desc);
   }
 
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByName() {
+    return addSortByInternal('name', Sort.asc);
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByNameDesc() {
+    return addSortByInternal('name', Sort.desc);
+  }
+
   QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPrivateKeyId() {
     return addSortByInternal('privateKeyId', Sort.asc);
   }
@@ -506,12 +789,20 @@ extension KeypairQueryWhereSortThenBy
     return addSortByInternal('privateKeyId', Sort.desc);
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPublicKey() {
-    return addSortByInternal('publicKey', Sort.asc);
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPublicKeyBase64() {
+    return addSortByInternal('publicKeyBase64', Sort.asc);
   }
 
-  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPublicKeyDesc() {
-    return addSortByInternal('publicKey', Sort.desc);
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPublicKeyBase64Desc() {
+    return addSortByInternal('publicKeyBase64', Sort.desc);
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPublicKeyOpenSSH() {
+    return addSortByInternal('publicKeyOpenSSH', Sort.asc);
+  }
+
+  QueryBuilder<Keypair, Keypair, QAfterSortBy> thenByPublicKeyOpenSSHDesc() {
+    return addSortByInternal('publicKeyOpenSSH', Sort.desc);
   }
 }
 
@@ -521,14 +812,26 @@ extension KeypairQueryWhereDistinct
     return addDistinctByInternal('id');
   }
 
+  QueryBuilder<Keypair, Keypair, QDistinct> distinctByName(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('name', caseSensitive: caseSensitive);
+  }
+
   QueryBuilder<Keypair, Keypair, QDistinct> distinctByPrivateKeyId(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('privateKeyId', caseSensitive: caseSensitive);
   }
 
-  QueryBuilder<Keypair, Keypair, QDistinct> distinctByPublicKey(
+  QueryBuilder<Keypair, Keypair, QDistinct> distinctByPublicKeyBase64(
       {bool caseSensitive = true}) {
-    return addDistinctByInternal('publicKey', caseSensitive: caseSensitive);
+    return addDistinctByInternal('publicKeyBase64',
+        caseSensitive: caseSensitive);
+  }
+
+  QueryBuilder<Keypair, Keypair, QDistinct> distinctByPublicKeyOpenSSH(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('publicKeyOpenSSH',
+        caseSensitive: caseSensitive);
   }
 }
 
@@ -538,11 +841,23 @@ extension KeypairQueryProperty
     return addPropertyNameInternal('id');
   }
 
+  QueryBuilder<Keypair, String, QQueryOperations> nameProperty() {
+    return addPropertyNameInternal('name');
+  }
+
   QueryBuilder<Keypair, String, QQueryOperations> privateKeyIdProperty() {
     return addPropertyNameInternal('privateKeyId');
   }
 
-  QueryBuilder<Keypair, String, QQueryOperations> publicKeyProperty() {
+  QueryBuilder<Keypair, Uint8List, QQueryOperations> publicKeyProperty() {
     return addPropertyNameInternal('publicKey');
+  }
+
+  QueryBuilder<Keypair, String, QQueryOperations> publicKeyBase64Property() {
+    return addPropertyNameInternal('publicKeyBase64');
+  }
+
+  QueryBuilder<Keypair, String, QQueryOperations> publicKeyOpenSSHProperty() {
+    return addPropertyNameInternal('publicKeyOpenSSH');
   }
 }

@@ -30,6 +30,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      appBar: AppBar(
+        title: const Text("Settings"),
+      ),
       body: pages[_selectedDestination],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedDestination,
