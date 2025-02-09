@@ -1,34 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shino_flutter/main.dart';
-
-part 'servers.g.dart';
-
-class Server {
-  final String name;
-  final String key;
-  final String address;
-  final int port;
-
-  Server(this.name, this.key, this.address, this.port);
-}
-
-@riverpod
-Future<List<Server>> servers(Ref ref) async {
-  // keys are names, values are key@host:port
-  final entries = await secureStorage.readAll();
-  print(entries);
-
-  return entries.entries.map((entry) {
-    final parts = entry.value.split("@");
-    final key = parts[0];
-    final address = parts[1].split(":")[0];
-    final port = int.parse(parts[1].split(":")[1]);
-
-    return Server(entry.key, key, address, port);
-  }).toList();
-}
+import 'package:shino_flutter/pages/server/home.dart';
+import 'package:shino_flutter/server.dart';
 
 class ServersPage extends ConsumerWidget {
   const ServersPage({super.key});
@@ -50,6 +24,9 @@ class ServersPage extends ConsumerWidget {
             ListTile(
               title: Text(server.name),
               subtitle: Text("${server.address}:${server.port}"),
+              onTap: () {
+                Navigator.push(context, HomePage.route(server));
+              },
             ),
         ],
       ),
@@ -87,7 +64,8 @@ class _AddServerSheetState extends State<AddServerSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: ListView(
+        shrinkWrap: true,
         children: [
           TextField(
             controller: _nameController,
