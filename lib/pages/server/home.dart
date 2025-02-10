@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shino_flutter/pages/server/bluetooth.dart';
-import 'package:shino_flutter/server.dart';
+import 'package:shino/pages/server/bluetooth.dart';
+import 'package:shino/server.dart';
 
 class HomePage extends StatelessWidget {
   final Server server;

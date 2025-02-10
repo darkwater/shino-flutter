@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:shino_flutter/main.dart';
-import 'package:shino_flutter/pages/server/home.dart';
-import 'package:shino_flutter/server.dart';
+import 'package:shino/main.dart';
+import 'package:shino/pages/server/home.dart';
+import 'package:shino/server.dart';
 
 class ServersPage extends ConsumerWidget {
   const ServersPage({super.key});

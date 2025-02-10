@@ -1,6 +1,6 @@
 {
-    "name": "shino_flutter",
-    "short_name": "shino_flutter",
+    "name": "shino",
+    "short_name": "shino",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shino_flutter/api/shino.dart';
-import 'package:shino_flutter/server.dart';
+import 'package:shino/api/shino.dart';
+import 'package:shino/server.dart';
 
 part 'bluetooth.g.dart';
 

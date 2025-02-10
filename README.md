@@ -1,4 +1,4 @@
-# shino_flutter
+# shino
 
 A new Flutter project.
 

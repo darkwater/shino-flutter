@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shino_flutter/api/shino.dart';
-import 'package:shino_flutter/main.dart';
+import 'package:shino/api/shino.dart';
+import 'package:shino/main.dart';
 
 part 'server.g.dart';
 

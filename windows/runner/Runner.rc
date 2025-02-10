@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "red.dark" "\0"
-            VALUE "FileDescription", "shino_flutter" "\0"
+            VALUE "FileDescription", "shino" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "shino_flutter" "\0"
+            VALUE "InternalName", "shino" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 red.dark. All rights reserved." "\0"
-            VALUE "OriginalFilename", "shino_flutter.exe" "\0"
-            VALUE "ProductName", "shino_flutter" "\0"
+            VALUE "OriginalFilename", "shino.exe" "\0"
+            VALUE "ProductName", "shino" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
