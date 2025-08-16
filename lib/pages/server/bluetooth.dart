@@ -78,12 +78,12 @@ class _DeviceList extends ConsumerWidget {
     final devices = devicesRef.value!.toList(growable: false);
 
     devices.sort((a, b) {
-      final icon = (a.icon ?? "").compareTo(b.icon ?? "");
+      final icon = (a.icon ?? "zzzz").compareTo(b.icon ?? "zzzz");
       if (icon != 0) {
         return icon;
       }
 
-      final name = a.name!.compareTo(b.name!);
+      final name = (a.name ?? a.address).compareTo(b.name ?? a.address);
       if (name != 0) {
         return name;
       }
@@ -137,8 +137,10 @@ class _DeviceTileState extends ConsumerState<_DeviceTile> {
               ),
             )
           : bluetoothDeviceIcon(widget.device.icon),
-      title: Text(widget.device.name ?? "Unknown"),
-      subtitle: Text(widget.device.icon.toString()),
+      title: Text(widget.device.name ?? widget.device.address),
+      subtitle: widget.device.icon != null
+          ? Text(widget.device.icon.toString())
+          : null,
       selected: widget.device.isConnected,
       trailing: PopupMenuButton<String>(
         itemBuilder: (context) => [
